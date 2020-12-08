@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
 
-const CompanySchema = new mongoose.Schema({
-  name:{type:String, default:''}
+const GroupSchema = new mongoose.Schema({
+  name:{type:String},
+  company:{type:String, default:''},
+  owner:{type:mongoose.Schema.Types.ObjectId, ref:'Company'}
 });
 
-module.exports = mongoose.model('Company', CompanySchema);
+module.exports = mongoose.model('Group', GroupSchema);

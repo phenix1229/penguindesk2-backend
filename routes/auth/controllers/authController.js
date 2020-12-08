@@ -21,9 +21,12 @@ module.exports = {
     //get users
     getUsers: async (req, res) => {
         try {
-            const users = await User.find({}).select('email').select('-_id');
+            const users = await User.find({});
             const userList = [];
-            users.forEach(item => userList.push(item.email))
+            users.forEach(item => {
+                if(item.company === req.params.id){
+                    userList.push(item.name)}
+                })
             res.status(200).json(userList);
         } catch (err) {
             console.error(err.message);
@@ -41,29 +44,17 @@ module.exports = {
             res.status(500).json({msg:'server error'});
         }
     },
-    
-    //update group
-    updateGroup: async (req, res) => {
-        try {
-            const {member} = req.body.member
-            await Group.findByIdAndUpdate({name:req.params.id})
-                .then(group => {
-                    group.members = [...group.members, member];
-                    group.save();
-                })
-            res.status(200).json(group);
-        } catch (err) {
-            console.error(err.message);
-            res.status(500).json({msg:'server error'});
-        }
-    },
-    
+
     //get groups
     getGroups: async (req, res) => {
         try {
-            const groups = await Group.find({}).select('name').select('-_id');
+            const groups = await Group.find({});
             const groupList = [];
-            groups.forEach(item => groupList.push(item.name))
+            groups.forEach(item => {
+                if(item.company === req.params.id){
+                    groupList.push(item.name)
+                }
+            })
             res.status(200).json(groupList);
         } catch (err) {
             console.error(err.message);
@@ -73,20 +64,26 @@ module.exports = {
 
     //add group
     addGroup: async (req, res) => {
-        const {name} = req.body
+        const {name, company, owner} = req.body
 
         try {
-            let group = await Group.findOne({name});
-            if(group){
-                return res.status(400).json({msg:'Group already exists'});
-            };
-            group = new Group({
-                name
+            let groupList = await Group.find({company});
+            console.log(groupList);
+            groupList.forEach(item => {
+                if(item.name === name){
+                    return res.status(400).json({msg:'Group already exists'});
+                };
+            })
+            newGroup = new Group({
+                name,
+                company,
+                owner
             });
-            await group.save();
-            return res.json(group);
-        } catch {
-            
+            await newGroup.save();
+            return res.json(newGroup);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).json({msg:'server error'})
         }
     },
 

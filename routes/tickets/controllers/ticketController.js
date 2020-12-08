@@ -3,7 +3,7 @@ const utils = require('../utils/ticketUtils');
 
 module.exports = {
     createTicket:(req, res) => {
-        const {openedBy, client, issue, comments, resolution, status, closedBy, closeDate, assignedGroup, assignedTech} = req.body;
+        const {openedBy, client, issue, comments, resolution, status, closedBy, closeDate, assignedGroup, assignedTech, company, owner} = req.body;
         const ticketNumber = utils.findUnique();
 
         const newTicket = new Ticket();
@@ -18,17 +18,32 @@ module.exports = {
         newTicket.closeDate = closeDate;
         newTicket.assignedTech = assignedTech;
         newTicket.assignedGroup = assignedGroup;
+        newTicket.company = company;
+        newTicket.owner = owner
         newTicket.save().then((ticket) => {
             return res.json(ticket);
         });
     },
 
-    getTickets:(req, res) => {
-        Ticket.find({})
-        .then((tickets) => {
-            tickets.reverse();
-            return res.json(tickets.filter(item => item.status === 'Open'));
-        });
+    getTickets: async (req, res) => {
+        try {
+            const tickets = await Ticket.find({});
+            const ticketList = [];
+            tickets.forEach(item => {
+                if(item.company === req.params.id && item.status === 'Open'){
+                    ticketList.push(item)
+                }
+            })
+            ticketList.reverse();
+            res.status(200).json(ticketList);
+            // .then((tickets) => {
+            //     tickets.reverse();
+            //     return res.json(tickets.filter(item => item.status === 'Open'));
+            // });
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).json({msg:'server error'});
+        }
     },
 
     getTicket:(req, res) => {

@@ -26,12 +26,17 @@ module.exports = {
             if(co){
                 return res.status(400).json({msg:'Company already exists'});
             };
+            co = new Company({
+                name: `${company}`
+            })
+            await co.save();
             user = new User({
                 name,
                 email,
                 password,
                 company,
-                group: `${company}-admin`,
+                owner: co._id,
+                group: 'Admin',
                 isAdmin: true
             });
 
@@ -41,17 +46,11 @@ module.exports = {
 
             await user.save();
             grp = new Group({
-                name:`${company}-admin`
+                name:'Admin',
+                company:co.name,
+                owner:co._id
             })
             await grp.save()
-            .then(group => {
-                group.members = [...group.members, email];
-                group.save();
-            });
-            co = new Company({
-                name: `${company}`
-            })
-            await co.save();
 
             const payload = {
                 user: {
@@ -78,7 +77,7 @@ module.exports = {
         if(!errors.isEmpty()){
             return res.status(400).json({errors: errors.array()})
         }
-        const {name, email, password, company, group, isAdmin} = req.body;
+        const {name, email, password, company, owner, group, isAdmin} = req.body;
 
         try {
             let user = await User.findOne({email});
@@ -90,6 +89,7 @@ module.exports = {
                 email,
                 password,
                 company,
+                owner,
                 group,
                 isAdmin
             });
@@ -99,11 +99,6 @@ module.exports = {
             user.password = await bcrypt.hash(password, salt);
 
             await user.save();
-            await Group.findOne({name:group})
-            .then(group => {
-                group.members = [...group.members, email];
-                group.save();
-            })
 
             return res.json(user);
         } catch (err) {

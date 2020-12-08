@@ -18,7 +18,9 @@ const TicketSchema = new mongoose.Schema({
   comments:{type:Array, default:[]},
   resolution:{type:String},
   closedBy:{type:String},
-  closeDate:{type:String}
+  closeDate:{type:String},
+  company:{type:String, default:''},
+  owner:{type:mongoose.Schema.Types.ObjectId, ref:'Company'}
 });
 
 module.exports = mongoose.model('Ticket', TicketSchema);

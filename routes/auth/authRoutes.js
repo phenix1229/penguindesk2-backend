@@ -7,10 +7,10 @@ const authController = require('./controllers/authController');
 router.get('/', auth, authController.getUser);
 
 //get users
-router.get('/users', authController.getUsers);
+router.get('/users/:id', authController.getUsers);
 
 //get groups
-router.get('/groups', authController.getGroups);
+router.get('/groups/:id', authController.getGroups);
 
 //get group
 router.get('/groups/:id', authController.getGroups);
@@ -20,8 +20,5 @@ router.post('/', authController.login);
 
 //add group
 router.post('/groups', authController.addGroup);
-
-//update group
-router.put('/groups/:id', authController.updateGroup);
 
 module.exports = router;
